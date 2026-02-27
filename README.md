@@ -4,6 +4,10 @@ A DankMaterialShell plugin for [mpvpaper](https://github.com/GhostNaN/mpvpaper).
 
 ![dms-mpvpaper Screenshot](screenshot.png)
 
+## Prerequisites
+- [mpvpaper](https://github.com/GhostNaN/mpvpaper)
+- Working DMS install
+
 ## Installation
 
 Only manual installation for now.
