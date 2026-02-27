@@ -5,6 +5,7 @@ A DankMaterialShell plugin for [mpvpaper](https://github.com/GhostNaN/mpvpaper).
 ![dms-mpvpaper Screenshot](screenshot.png)
 
 ## Prerequisites
+- ffmpeg (for matugen support)
 - [mpvpaper](https://github.com/GhostNaN/mpvpaper)
 - Working DMS install
 

@@ -355,6 +355,119 @@ PluginSettings {
     }
 
     StyledText {
+        text: "Static Wallpaper Generation"
+        font.pixelSize: Theme.fontSizeMedium
+        font.weight: Font.Medium
+    }
+
+    Column {
+        width: parent.width
+        spacing: 2
+
+        Row {
+            width: parent.width
+            spacing: Theme.spacingM
+
+            StyledText {
+                text: "Generate Static Wallpaper"
+                font.pixelSize: Theme.fontSizeSmall
+                width: 180
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            DankToggle {
+                id: generateStaticWallpaperToggle
+                anchors.verticalCenter: parent.verticalCenter
+
+                Binding {
+                    target: generateStaticWallpaperToggle
+                    property: "checked"
+                    value: loadValue("generateStaticWallpaper", false)
+                }
+
+                onToggled: {
+                    saveValue("generateStaticWallpaper", checked)
+                }
+            }
+        }
+        StyledText {
+            text: "Extract a frame from the video for lock screen and theme color generation"
+            font.pixelSize: Theme.fontSizeSmall * 0.9
+            opacity: 0.5
+            width: parent.width
+            wrapMode: Text.Wrap
+        }
+    }
+
+    Timer {
+        id: screenshotDelayDebounceTimer
+        interval: 500
+        repeat: false
+        onTriggered: {
+            saveValue("screenshotDelay", Math.round(screenshotDelaySlider.value))
+        }
+    }
+
+    Column {
+        width: parent.width
+        spacing: 2
+        visible: loadValue("generateStaticWallpaper", false)
+
+        Row {
+            width: parent.width
+            height: 24
+            spacing: Theme.spacingM
+
+            StyledText {
+                text: "Screenshot Delay"
+                font.pixelSize: Theme.fontSizeSmall
+                width: 180
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            DankSlider {
+                id: screenshotDelaySlider
+                width: parent.width - 180 - Theme.spacingM - screenshotDelayValueText.width - Theme.spacingM
+                minimum: 0
+                maximum: 30
+                showValue: false
+                anchors.verticalCenter: parent.verticalCenter
+
+                Binding {
+                    target: screenshotDelaySlider
+                    property: "value"
+                    value: loadValue("screenshotDelay", 5)
+                }
+
+                onSliderValueChanged: (newValue) => {
+                    screenshotDelayDebounceTimer.restart()
+                }
+            }
+
+            StyledText {
+                id: screenshotDelayValueText
+                text: Math.round(screenshotDelaySlider.value) + "s"
+                font.pixelSize: Theme.fontSizeSmall
+                width: 40
+                anchors.verticalCenter: parent.verticalCenter
+            }
+        }
+        StyledText {
+            text: "Seconds into the video to capture the frame"
+            font.pixelSize: Theme.fontSizeSmall * 0.9
+            opacity: 0.5
+            width: parent.width
+            wrapMode: Text.Wrap
+        }
+    }
+
+    Rectangle {
+        width: parent.width
+        height: 1
+        color: Theme.outlineStrong
+    }
+
+    StyledText {
         text: "Advanced"
         font.pixelSize: Theme.fontSizeMedium
         font.weight: Font.Medium
