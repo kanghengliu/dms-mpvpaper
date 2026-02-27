@@ -103,6 +103,7 @@ PluginComponent {
     function buildMpvOptions() {
         var parts = []
         if (noAudio) parts.push("no-audio")
+        parts.push("load-scripts=no")
         if (loopPlaylist) parts.push("--loop-playlist")
         if (panscanEnabled) parts.push("--panscan=" + panscanValue.toFixed(2))
         if (customMpvOptions.trim()) parts.push(customMpvOptions.trim())
