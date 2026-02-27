@@ -279,7 +279,7 @@ PluginComponent {
         const cacheHome = StandardPaths.writableLocation(StandardPaths.GenericCacheLocation).toString()
         const baseDir = Paths.strip(cacheHome)
         const outDir = baseDir + "/DankMaterialShell/mpvpaper_screenshots"
-        const outputPath = outDir + "/" + monitor + ".jpg"
+        const outputPath = outDir + "/" + monitor + "_" + Date.now() + ".jpg"
 
         Quickshell.execDetached(["mkdir", "-p", outDir])
 
@@ -287,10 +287,40 @@ PluginComponent {
             monitor: monitor,
             videoPath: videoPath,
             outputPath: outputPath,
+            outDir: outDir,
             delay: root.screenshotDelay,
             forAllMonitors: allScreens || false
         })
         proc.running = true
+    }
+
+    Component {
+        id: setWallpaperTimer
+
+        Timer {
+            property string monitor: ""
+            property string screenshotPath: ""
+            property bool forAllMonitors: false
+
+            running: false
+            repeat: false
+            interval: 500
+
+            onTriggered: {
+                console.info("mpvpaper: Set wallpaper on", monitor, "to", screenshotPath)
+                if (!SessionData.perMonitorWallpaper) {
+                    SessionData.setPerMonitorWallpaper(true)
+                }
+                if (forAllMonitors) {
+                    for (var i = 0; i < Quickshell.screens.length; i++) {
+                        SessionData.setMonitorWallpaper(Quickshell.screens[i].name, screenshotPath)
+                    }
+                } else {
+                    SessionData.setMonitorWallpaper(monitor, screenshotPath)
+                }
+                destroy()
+            }
+        }
     }
 
     Component {
@@ -300,12 +330,14 @@ PluginComponent {
             property string monitor: ""
             property string videoPath: ""
             property string outputPath: ""
+            property string outDir: ""
             property int delay: 5
             property bool forAllMonitors: false
 
             command: [
                 "sh", "-c",
-                'video_path="$1"; output="$2"; delay="$3"; ' +
+                'video_path="$1"; output="$2"; delay="$3"; outdir="$4"; mon="$5"; ' +
+                'rm -f "$outdir"/"$mon"_*.jpg 2>/dev/null; ' +
                 'if [ -d "$video_path" ]; then ' +
                 '  video_path=$(find "$video_path" -maxdepth 1 -type f \\( ' +
                 '    -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.webm" ' +
@@ -315,22 +347,18 @@ PluginComponent {
                 'fi; ' +
                 'if [ -z "$video_path" ] || [ ! -f "$video_path" ]; then exit 1; fi; ' +
                 'ffmpeg -y -ss "$delay" -i "$video_path" -frames:v 1 -q:v 2 "$output"',
-                "_", videoPath, outputPath, String(delay)
+                "_", videoPath, outputPath, String(delay), outDir, monitor
             ]
 
             onExited: (code) => {
                 if (code === 0) {
                     console.info("mpvpaper: Screenshot captured for", monitor, "at", outputPath)
-                    if (!SessionData.perMonitorWallpaper) {
-                        SessionData.setPerMonitorWallpaper(true)
-                    }
-                    if (forAllMonitors) {
-                        for (var i = 0; i < Quickshell.screens.length; i++) {
-                            SessionData.setMonitorWallpaper(Quickshell.screens[i].name, outputPath)
-                        }
-                    } else {
-                        SessionData.setMonitorWallpaper(monitor, outputPath)
-                    }
+                    var timer = setWallpaperTimer.createObject(root, {
+                        monitor: monitor,
+                        screenshotPath: outputPath,
+                        forAllMonitors: forAllMonitors
+                    })
+                    timer.running = true
                 } else {
                     console.warn("mpvpaper: Screenshot failed for", monitor, "exit code:", code)
                 }
