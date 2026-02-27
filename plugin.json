@@ -1,0 +1,17 @@
+{
+    "id": "mpvpaperWallpaper",
+    "name": "mpvpaper Video Wallpaper",
+    "description": "Video wallpaper support using mpvpaper",
+    "version": "1.0.0",
+    "author": "kanghengliu",
+    "type": "daemon",
+    "capabilities": ["wallpaper", "animation"],
+    "component": "./MpvpaperPlugin.qml",
+    "icon": "wallpaper",
+    "settings": "./MpvpaperSettings.qml",
+    "permissions": [
+        "settings_read",
+        "settings_write"
+    ],
+    "requires": ["mpvpaper"]
+}
