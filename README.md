@@ -20,6 +20,6 @@ cp -r dms-mpvpaper ~/.config/DankMaterialShell/plugins/
 # Enable in DMS settings under Plugins tab.
 ```
 
-## Acknoledgements
+## Acknowledgements
  - Inspiration: [dms-wallpaperengine](https://github.com/sgtaziz/dms-wallpaperengine)
  - The wonderful [DankMaterialShell](https://danklinux.com/)
