@@ -461,6 +461,65 @@ PluginSettings {
         }
     }
 
+    Column {
+        width: parent.width
+        spacing: 2
+        visible: loadValue("generateStaticWallpaper", false)
+
+        Row {
+            width: parent.width
+            spacing: Theme.spacingM
+
+            StyledText {
+                text: "Theme Color Monitor"
+                font.pixelSize: Theme.fontSizeSmall
+                width: 180
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            DankDropdown {
+                width: parent.width - 180 - Theme.spacingM
+                compactMode: true
+                options: {
+                    var screenNames = []
+                    var screens = Quickshell.screens
+                    for (var i = 0; i < screens.length; i++) {
+                        var label = screens[i].name
+                        if (i === 0 && (!SettingsData.matugenTargetMonitor || SettingsData.matugenTargetMonitor === "")) {
+                            label += " (Default)"
+                        }
+                        screenNames.push(label)
+                    }
+                    return screenNames
+                }
+                currentValue: {
+                    var screens = Quickshell.screens
+                    if (!SettingsData.matugenTargetMonitor || SettingsData.matugenTargetMonitor === "") {
+                        return screens.length > 0 ? screens[0].name + " (Default)" : "No monitors"
+                    }
+                    return SettingsData.matugenTargetMonitor
+                }
+                onValueChanged: value => {
+                    var cleanValue = value.replace(" (Default)", "")
+                    var screens = Quickshell.screens
+                    for (var i = 0; i < screens.length; i++) {
+                        if (screens[i].name === cleanValue) {
+                            SettingsData.setMatugenTargetMonitor(screens[i].name)
+                            return
+                        }
+                    }
+                }
+            }
+        }
+        StyledText {
+            text: "Monitor to use for theme color generation"
+            font.pixelSize: Theme.fontSizeSmall * 0.9
+            opacity: 0.5
+            width: parent.width
+            wrapMode: Text.Wrap
+        }
+    }
+
     Rectangle {
         width: parent.width
         height: 1
