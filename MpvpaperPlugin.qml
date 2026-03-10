@@ -19,6 +19,8 @@ PluginComponent {
     property string customMpvOptions: pluginData.customMpvOptions || ""
     property bool generateStaticWallpaper: pluginData.generateStaticWallpaper || false
     property int screenshotDelay: pluginData.screenshotDelay !== undefined ? pluginData.screenshotDelay : 5
+    property bool periodicRestart: pluginData.periodicRestart || false
+    property int restartIntervalMinutes: pluginData.restartIntervalMinutes !== undefined ? pluginData.restartIntervalMinutes : 30
     property bool prevGenerateStaticWallpaper: false
     property var processes: ({})
     property var previousScreenNames: []
@@ -36,6 +38,17 @@ PluginComponent {
         interval: 50
         repeat: false
         onTriggered: syncWithData()
+    }
+
+    Timer {
+        id: restartTimer
+        interval: restartIntervalMinutes * 60 * 1000
+        repeat: true
+        running: periodicRestart && ready
+        onTriggered: {
+            console.info("mpvpaper: Periodic restart triggered (every", restartIntervalMinutes, "minutes)")
+            restartAllProcesses()
+        }
     }
 
     onGenerateStaticWallpaperChanged: {
@@ -113,6 +126,21 @@ PluginComponent {
     function stopAllProcesses() {
         for (const key in processes) {
             stopMpvpaper(key, false)
+        }
+    }
+
+    function restartAllProcesses() {
+        if (allMonitors) {
+            if (allMonitorsPath && processes["ALL"]) {
+                launchMpvpaper("ALL", allMonitorsPath)
+            }
+        } else {
+            for (const monitor in processes) {
+                const path = monitorPaths[monitor]
+                if (path) {
+                    launchMpvpaper(monitor, path)
+                }
+            }
         }
     }
 

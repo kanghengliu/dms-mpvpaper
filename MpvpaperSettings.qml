@@ -532,6 +532,107 @@ PluginSettings {
         font.weight: Font.Medium
     }
 
+    Column {
+        width: parent.width
+        spacing: 2
+
+        Row {
+            width: parent.width
+            spacing: Theme.spacingM
+
+            StyledText {
+                text: "Periodic Restart"
+                font.pixelSize: Theme.fontSizeSmall
+                width: 180
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            DankToggle {
+                id: periodicRestartToggle
+                anchors.verticalCenter: parent.verticalCenter
+
+                Binding {
+                    target: periodicRestartToggle
+                    property: "checked"
+                    value: loadValue("periodicRestart", false)
+                }
+
+                onToggled: {
+                    saveValue("periodicRestart", checked)
+                }
+            }
+        }
+        StyledText {
+            text: "Automatically restart mpvpaper at a set interval to prevent memory leaks"
+            font.pixelSize: Theme.fontSizeSmall * 0.9
+            opacity: 0.5
+            width: parent.width
+            wrapMode: Text.Wrap
+        }
+    }
+
+    Timer {
+        id: restartIntervalDebounceTimer
+        interval: 500
+        repeat: false
+        onTriggered: {
+            saveValue("restartIntervalMinutes", Math.round(restartIntervalSlider.value))
+        }
+    }
+
+    Column {
+        width: parent.width
+        spacing: 2
+        visible: loadValue("periodicRestart", false)
+
+        Row {
+            width: parent.width
+            height: 24
+            spacing: Theme.spacingM
+
+            StyledText {
+                text: "Restart Interval"
+                font.pixelSize: Theme.fontSizeSmall
+                width: 180
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            DankSlider {
+                id: restartIntervalSlider
+                width: parent.width - 180 - Theme.spacingM - restartIntervalValueText.width - Theme.spacingM
+                minimum: 5
+                maximum: 120
+                showValue: false
+                anchors.verticalCenter: parent.verticalCenter
+
+                Binding {
+                    target: restartIntervalSlider
+                    property: "value"
+                    value: loadValue("restartIntervalMinutes", 30)
+                }
+
+                onSliderValueChanged: (newValue) => {
+                    restartIntervalDebounceTimer.restart()
+                }
+            }
+
+            StyledText {
+                id: restartIntervalValueText
+                text: Math.round(restartIntervalSlider.value) + "m"
+                font.pixelSize: Theme.fontSizeSmall
+                width: 40
+                anchors.verticalCenter: parent.verticalCenter
+            }
+        }
+        StyledText {
+            text: "Minutes between each automatic restart"
+            font.pixelSize: Theme.fontSizeSmall * 0.9
+            opacity: 0.5
+            width: parent.width
+            wrapMode: Text.Wrap
+        }
+    }
+
     StyledText {
         text: "Custom mpv Options"
         font.pixelSize: Theme.fontSizeSmall
