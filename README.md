@@ -11,8 +11,11 @@ A DankMaterialShell plugin for [mpvpaper](https://github.com/GhostNaN/mpvpaper).
 
 ## Installation
 
-Only manual installation for now.
+### Install via plugin store
+Install the plugin from DMS plugin registry. Make sure `show 3rd party` is set to on when searching.
+
 ### Manual Installation
+For latest head:
 ```bash
 # Copy plugin to DMS plugins directory (create it if it doesn't exist)
 cp -r dms-mpvpaper ~/.config/DankMaterialShell/plugins/
