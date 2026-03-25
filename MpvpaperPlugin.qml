@@ -658,12 +658,39 @@ PluginComponent {
                     width: parent.width
                     spacing: Theme.spacingS
 
-                    StyledText {
-                        text: "WALLPAPERS"
-                        font.pixelSize: Theme.fontSizeSmall - 1
-                        font.weight: Font.DemiBold
-                        color: Theme.surfaceVariantText
-                        font.letterSpacing: 1
+                    Item {
+                        width: parent.width
+                        height: 30
+
+                        StyledText {
+                            text: "WALLPAPERS"
+                            font.pixelSize: Theme.fontSizeSmall - 1
+                            font.weight: Font.DemiBold
+                            color: Theme.surfaceVariantText
+                            font.letterSpacing: 1
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+
+                        StyledText {
+                            text: "All"
+                            font.pixelSize: Theme.fontSizeSmall - 1
+                            color: Theme.surfaceVariantText
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.right: allMonSwitch.left
+                            anchors.rightMargin: Theme.spacingXS
+                        }
+
+                        DankToggle {
+                            id: allMonSwitch
+                            width: 52
+                            height: 30
+                            checked: root.allMonitors
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            onToggled: {
+                                root.pluginService.savePluginData(root.pluginId, "allMonitors", checked)
+                            }
+                        }
                     }
 
                     // All monitors card
