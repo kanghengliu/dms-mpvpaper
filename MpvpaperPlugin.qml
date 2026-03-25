@@ -11,6 +11,8 @@ import qs.Modals.FileBrowser
 PluginComponent {
     id: root
 
+    property var popoutService: null
+
     // --- Data properties (reactive via pluginData) ---
     property var monitorPaths: pluginData.monitorPaths || {}
     property bool allMonitors: pluginData.allMonitors !== undefined ? pluginData.allMonitors : false
@@ -599,6 +601,33 @@ PluginComponent {
             headerText: "Video Wallpaper"
             detailsText: root.statusText
             showCloseButton: true
+
+            headerActions: Component {
+                Rectangle {
+                    width: 28
+                    height: 28
+                    radius: 14
+                    color: settingsArea.containsMouse ? Theme.surfaceContainerHighest : "transparent"
+
+                    DankIcon {
+                        anchors.centerIn: parent
+                        name: "settings"
+                        size: 18
+                        color: Theme.surfaceVariantText
+                    }
+
+                    MouseArea {
+                        id: settingsArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (popout.closePopout) popout.closePopout()
+                            root.popoutService?.focusOrToggleSettingsWithTab("plugins")
+                        }
+                    }
+                }
+            }
 
             Column {
                 width: parent.width
