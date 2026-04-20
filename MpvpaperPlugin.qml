@@ -17,6 +17,7 @@ PluginComponent {
     property var monitorPaths: pluginData.monitorPaths || {}
     property bool allMonitors: pluginData.allMonitors !== undefined ? pluginData.allMonitors : false
     property string allMonitorsPath: pluginData.allMonitorsPath || ""
+    property bool autoPause: pluginData.autoPause !== undefined ? pluginData.autoPause : false
     property bool noAudio: pluginData.noAudio !== undefined ? pluginData.noAudio : true
     property bool loopPlaylist: pluginData.loopPlaylist !== undefined ? pluginData.loopPlaylist : true
     property bool panscanEnabled: pluginData.panscanEnabled !== undefined ? pluginData.panscanEnabled : true
@@ -386,7 +387,9 @@ PluginComponent {
             property string videoPath: ""
             property string launchedOptions: ""
 
-            command: ["mpvpaper", "-o", launchedOptions, monitor, videoPath]
+            command: root.autoPause
+                ? ["mpvpaper", "-p", "-o", launchedOptions, monitor, videoPath]
+                : ["mpvpaper", "-o", launchedOptions, monitor, videoPath]
 
             onExited: (code) => {
                 if (code !== 0) {
