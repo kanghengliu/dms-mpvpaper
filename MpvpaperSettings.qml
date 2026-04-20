@@ -217,6 +217,45 @@ PluginSettings {
             spacing: Theme.spacingM
 
             StyledText {
+                text: "Auto Pause"
+                font.pixelSize: Theme.fontSizeSmall
+                width: 180
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            DankToggle {
+                id: autoPauseToggle
+                anchors.verticalCenter: parent.verticalCenter
+
+                Binding {
+                    target: autoPauseToggle
+                    property: "checked"
+                    value: loadValue("autoPause", false)
+                }
+
+                onToggled: {
+                    saveValue("autoPause", checked)
+                }
+            }
+        }
+        StyledText {
+            text: "Automatically pause playback when the wallpaper is hidden (e.g. fullscreen app). Note: this may not work reliably on all compositors."
+            font.pixelSize: Theme.fontSizeSmall * 0.9
+            opacity: 0.5
+            width: parent.width
+            wrapMode: Text.Wrap
+        }
+    }
+
+    Column {
+        width: parent.width
+        spacing: 2
+
+        Row {
+            width: parent.width
+            spacing: Theme.spacingM
+
+            StyledText {
                 text: "Loop Playlist"
                 font.pixelSize: Theme.fontSizeSmall
                 width: 180
