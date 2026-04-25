@@ -91,11 +91,44 @@ PluginComponent {
         }
     }
 
+    // The original check-then-set has a race when multiple widget instances
+    // (one per monitor) initialize together: they all read
+    // daemonOwnerVar.value === "" before any cross-instance propagation, all
+    // call set() and initDaemon(), and N mpvpaper processes get spawned.
+    //
+    // Fix: spread the claims with a short random pre-set delay, then verify
+    // ownership after enough time for propagation to settle. Last writer wins
+    // and only that instance ends up calling initDaemon().
+    Timer {
+        id: claimDelayTimer
+        interval: 50 + Math.floor(Math.random() * 450)
+        repeat: false
+        onTriggered: root.doClaimDaemon()
+    }
+
+    Timer {
+        id: claimVerifyTimer
+        interval: 1500
+        repeat: false
+        onTriggered: {
+            if (daemonOwnerVar.value === root.instanceId) {
+                console.info("mpvpaper: Instance", root.instanceId, "confirmed as daemon")
+                root.initDaemon()
+            } else {
+                console.info("mpvpaper: lost claim race, daemon owner is:", JSON.stringify(daemonOwnerVar.value))
+            }
+        }
+    }
+
     function tryClaimDaemon() {
+        claimDelayTimer.start()
+    }
+
+    function doClaimDaemon() {
         if (daemonOwnerVar.value === "") {
-            console.info("mpvpaper: Instance", instanceId, "claiming daemon")
+            console.info("mpvpaper: Instance", instanceId, "attempting daemon claim")
             daemonOwnerVar.set(instanceId)
-            initDaemon()
+            claimVerifyTimer.start()
         }
     }
 
