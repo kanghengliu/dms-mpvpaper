@@ -23,6 +23,12 @@ cp -r dms-mpvpaper ~/.config/DankMaterialShell/plugins/
 # Enable in DMS settings under Plugins tab.
 ```
 
+## Usage
+
+After enabling the plugin, **you must add the mpvpaper widget to a bar** for the wallpaper to start. DMS only instantiates widget-type plugins when they are placed in a bar, so without this step nothing will happen (no `mpvpaper` process will spawn) even after selecting a video.
+
+To add the widget: open DMS settings → Dank Bar → add **mpvpaper Video Wallpaper** to one of the widget slots (left/center/right). Then configure your video via the widget's popout or the plugin's settings page.
+
 ## Acknowledgements
  - Inspiration: [dms-wallpaperengine](https://github.com/sgtaziz/dms-wallpaperengine)
  - The wonderful [DankMaterialShell](https://danklinux.com/)
