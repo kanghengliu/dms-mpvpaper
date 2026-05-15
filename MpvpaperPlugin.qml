@@ -32,6 +32,7 @@ PluginComponent {
     property var previousScreenNames: []
     property bool ready: false
     property var pendingLaunches: ({})
+    property var latestScreenshotJobId: ({})
 
     // --- Multi-instance daemon coordination ---
     PluginGlobalVar {
@@ -455,13 +456,17 @@ PluginComponent {
 
         Quickshell.execDetached(["mkdir", "-p", outDir])
 
+        const jobId = (latestScreenshotJobId[monitor] || 0) + 1
+        latestScreenshotJobId[monitor] = jobId
+
         var proc = screenshotComponent.createObject(root, {
             monitor: monitor,
             videoPath: videoPath,
             outputPath: outputPath,
             outDir: outDir,
             delay: root.screenshotDelay,
-            forAllMonitors: allScreens || false
+            forAllMonitors: allScreens || false,
+            jobId: jobId
         })
         proc.running = true
     }
@@ -472,13 +477,20 @@ PluginComponent {
         Timer {
             property string monitor: ""
             property string screenshotPath: ""
+            property string outDir: ""
             property bool forAllMonitors: false
+            property int jobId: 0
 
             running: false
             repeat: false
             interval: 500
 
             onTriggered: {
+                if (jobId !== root.latestScreenshotJobId[monitor]) {
+                    console.info("mpvpaper: Discarding stale screenshot job", jobId, "for", monitor)
+                    destroy()
+                    return
+                }
                 console.info("mpvpaper: Set wallpaper on", monitor, "to", screenshotPath)
                 if (!SessionData.perMonitorWallpaper) {
                     SessionData.setPerMonitorWallpaper(true)
@@ -490,6 +502,10 @@ PluginComponent {
                 } else {
                     SessionData.setMonitorWallpaper(monitor, screenshotPath)
                 }
+                var keepName = screenshotPath.substring(screenshotPath.lastIndexOf("/") + 1)
+                Quickshell.execDetached(["sh", "-c",
+                    'find "$1" -maxdepth 1 -type f -name "$2_*.jpg" ! -name "$3" -delete 2>/dev/null',
+                    "_", outDir, monitor, keepName])
                 destroy()
             }
         }
@@ -505,11 +521,11 @@ PluginComponent {
             property string outDir: ""
             property int delay: 5
             property bool forAllMonitors: false
+            property int jobId: 0
 
             command: [
                 "sh", "-c",
-                'video_path="$1"; output="$2"; delay="$3"; outdir="$4"; mon="$5"; ' +
-                'rm -f "$outdir"/"$mon"_*.jpg 2>/dev/null; ' +
+                'video_path="$1"; output="$2"; delay="$3"; ' +
                 'if [ -d "$video_path" ]; then ' +
                 '  video_path=$(find "$video_path" -maxdepth 1 -type f \\( ' +
                 '    -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.webm" ' +
@@ -519,7 +535,7 @@ PluginComponent {
                 'fi; ' +
                 'if [ -z "$video_path" ] || [ ! -f "$video_path" ]; then exit 1; fi; ' +
                 'ffmpeg -y -ss "$delay" -i "$video_path" -frames:v 1 -q:v 2 "$output"',
-                "_", videoPath, outputPath, String(delay), outDir, monitor
+                "_", videoPath, outputPath, String(delay)
             ]
 
             onExited: (code) => {
@@ -528,7 +544,9 @@ PluginComponent {
                     var timer = setWallpaperTimer.createObject(root, {
                         monitor: monitor,
                         screenshotPath: outputPath,
-                        forAllMonitors: forAllMonitors
+                        outDir: outDir,
+                        forAllMonitors: forAllMonitors,
+                        jobId: jobId
                     })
                     timer.running = true
                 } else {
